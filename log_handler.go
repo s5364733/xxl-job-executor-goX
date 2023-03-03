@@ -2,7 +2,10 @@ package xxl
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
+	"os"
 )
 
 /**
@@ -11,17 +14,29 @@ import (
 
 type LogHandler func(req *LogReq) *LogRes
 
-//默认返回
+// 默认返回
 func defaultLogHandler(req *LogReq) *LogRes {
+	filename := fmt.Sprintf("log_%d", req.LogID)
+	file, err := os.Open(filename)
+
+	if err != nil {
+		fmt.Errorf("err %v", err)
+	}
+
+	fd, err := io.ReadAll(file)
+	if err != nil {
+		fmt.Println("read to fd fail", err)
+	}
+
 	return &LogRes{Code: SuccessCode, Msg: "", Content: LogResContent{
 		FromLineNum: req.FromLineNum,
 		ToLineNum:   2,
-		LogContent:  "这是日志默认返回，说明没有设置LogHandler",
+		LogContent:  string(fd),
 		IsEnd:       true,
 	}}
 }
 
-//请求错误
+// 请求错误
 func reqErrLogHandler(w http.ResponseWriter, req *LogReq, err error) {
 	res := &LogRes{Code: FailureCode, Msg: err.Error(), Content: LogResContent{
 		FromLineNum: req.FromLineNum,

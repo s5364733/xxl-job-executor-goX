@@ -29,7 +29,7 @@ func newOptions(opts ...Option) Options {
 	}
 
 	if opt.l == nil {
-		opt.l = &logger{}
+		opt.l = &Xlogger{}
 	}
 
 	return opt
